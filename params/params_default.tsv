@@ -1,0 +1,7 @@
+pid	pcov	phit	taxn	seqn	refres	ltgres
+100	70	70	1	1	species	species
+97	70	70	1	1	species	species
+95	70	70	2	2	species	species
+90	70	70	3	3	genus	species
+85	70	70	4	4	family	genus
+80	70	70	4	4	family	genus
