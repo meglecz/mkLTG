@@ -8,23 +8,34 @@ use mkLTG;
 # Make param files for a combination of different parameters
 # pid is fix within each parameter setting
 
-my $outdir = '/home/meglecz/mkLTG/benchmark/param_files_pid_fix/';
-my @pid = (100, 97, 95, 90, 85, 80);
+##########################
+##########################
+# set the parameter space here
+# get all combinations of the different values for each of the 5 parametres 
+my @pid = (100, 97, 95, 90, 85, 80); # 
 my @pcov = (100,90,80,70);
 my @phit = (100,90,80,70);
-
 my @taxn = (1,2,3,4,5);
 my @refres = (8,7,6,5,4);
-
+##########################
+##########################
 my @ltgres = ();
 my @seqn = ();
 
-$outdir = add_slash_to_dir($outdir);
+
+my %params = 
+(
+'windows' => 0,
+'outdir' => ''
+);
+modify_params_from_tags(\%params, \@ARGV);
+my $windows = $params{windows}; 
+my $outdir = $params{outdir};
+
+$outdir = add_slash_to_dir($outdir, $windows);
 my $t = time;
-unless(-e $outdir)
-{
-	system 'mkdir -p '.$outdir;
-}
+makedir($outdir, $windows);
+
 my $log = $outdir.'make_parameter_space_2.log';
 open(LOG, '>', $log);
 
@@ -69,4 +80,17 @@ print LOG "all combinations: $c\n";
 print LOG "Runtime ", time - $t, " seconds\n";
 close LOG;
 exit;
+
+########################################################################
+
+sub print_help
+{
+print '
+usage: perl make_param_files_pid_fix.pl [-options] -outdir OUTDIR 
+
+  -outdir                 name of the otput directory
+  -windows                set to one if running on windows', "\n";
+  exit;
+
+}
 

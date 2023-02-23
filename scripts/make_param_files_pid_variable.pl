@@ -8,23 +8,39 @@ use mkLTG;
 # Make param files for a combination of different parameters
 # pid varies in within each parameter setting
 
-my $outdir = '/home/meglecz/mkLTG/benchmark/param_files_pid_variable/';
-my @pid = (100, 97, 95, 90, 85, 80);
-my @pcov = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]);
-my @phit = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]);
+ 
 
-my @taxn = ([1], [1,2], [2,3,4], [3,4], [4,5], [4,5]);
-my @refres = ([8], [8,7], [8,7], [8,7,6], [7,6,5], [6,5,4]);
+##########################
+##########################
+# set the parameter space here
+my @pid = (100, 97, 95, 90, 85, 80); # list of pid values; same in all parametre setting
+my @pcov = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]); # pcov values for each pid values
+my @phit = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]); # phit values for each pid values
 
+my @taxn = ([1], [1], [2], [3], [4], [4]);
+#my @taxn = ([1], [1,2], [2,3,4], [3,4], [4,5], [4,5]); # taxn values for each pid values
+#my @refres = ([8], [8,7], [8,7], [8,7,6], [7,6,5], [6,5,4]); # refres values for each pid values; 8 species, 7 genus, 6 familly, 6 order, 5 class
+my @refres = ([8], [8], [8], [8], [7], [6]);
+##########################
+##########################
 my @ltgres = ();
 my @seqn = ();
 
-$outdir = add_slash_to_dir($outdir);
+
+my %params = 
+(
+'windows' => 0,
+'outdir' => ''
+);
+modify_params_from_tags(\%params, \@ARGV);
+
+my $windows = $params{windows}; 
+my $outdir = $params{outdir};
+
+$outdir = add_slash_to_dir($outdir, $windows);
 my $t = time;
-unless(-e $outdir)
-{
-	system 'mkdir -p '.$outdir;
-}
+makedir($outdir, $windows);
+
 my $log = $outdir.'make_files_pid_variable.log';
 open(LOG, '>', $log);
 print LOG "pid\n", Dumper(\@pid), "\n";
@@ -195,4 +211,18 @@ sub combine
 	}
 	return @combined_list;
 }
+
+########################################################################
+
+sub print_help
+{
+print '
+usage: perl make_param_files_pid_variable.pl [-options] -outdir OUTDIR 
+
+  -outdir                 name of the otput directory
+  -windows                set to one if running on windows', "\n";
+  exit;
+
+}
+
 

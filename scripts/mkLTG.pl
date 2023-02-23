@@ -44,20 +44,19 @@ use mkLTG;
 # sequences without ltg are kept in the file
 
 
-
 my %params = 
 (
-	'in' => '/home/meglecz/mkLTG/data/test1.fas', # could be a fasta file or a tsv with a column 'sequence' 
-	'taxonomy' => '/home/meglecz/mkCOInr/COInr/COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam_taxonomy.tsv',# if empty file is created from ncbi tax dmp files
+	'in' => '', # could be a fasta file or a tsv with a column 'sequence' 
+	'taxonomy' => '',# if empty file is created from ncbi tax dmp files
 	'ncbitax_dir' => '', # unless $taxonomy, make a taxonomy file including rank levels; can be emty if $taxonomy extists
-	'blast_db' => '/home/meglecz/mkCOInr/COInr/COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam',
-	'outdir' => '/home/meglecz/mkLTG/out',
-	'out_name' => 'test', # alpha-numeric string for naming output files
- 	'ltg_params' => '/home/meglecz/mkLTG/params/params_opt_for_COI.tsv',
-	'delete_tmp' => 0,
+	'blast_db' => '',
+	'outdir' => '',
+	'out_name' => '', # alpha-numeric string for naming output files
+ 	'ltg_params' => '',
+	'delete_tmp' => 1,
+	'windows' => 0, # set to 1 if running on windows
 	'blastout' => '', # if empty, run blast. otherwise this file is used to make ltg
 	# BLAST parameters
-	'blast_path' => '',
 	'task' => 'megablast',
 	'blast_e' => 1e-20,
 	'dust' => 'yes',
@@ -78,8 +77,7 @@ my $out_name = $params{out_name};
 my $ltg_params = $params{ltg_params};
 my $delete_tmp = $params{delete_tmp};  
 # BLAST parameters
-my $blastout = $params{blastout}; 
-my $blast_path = $params{blast_path}; 
+my $blastout = $params{blastout};  
 my $task = $params{task}; 
 my $blast_e = $params{blast_e}; 
 my $dust = $params{dust}; 
@@ -87,22 +85,24 @@ my $max_target_seqs = $params{max_target_seqs};
 my $num_threads = $params{num_threads}; 
 my $qcov_hsp_perc = $params{qcov_hsp_perc}; 
 my $batch_size = $params{batch_size}; 
+my $windows = $params{windows};
 
 # cannot be modified from command line
 my $outfmt = '6 qseqid sseqid pident length qcovhsp staxids evalue';
 
-$outdir = add_slash_to_dir($outdir);
-$ncbitax_dir = add_slash_to_dir($ncbitax_dir);
+$outdir = add_slash_to_dir($outdir, $windows);
+$ncbitax_dir = add_slash_to_dir($ncbitax_dir, $windows);
+
 # make temp dir
-my $tmpdir = $outdir.'tmp/';
+my $tmpdir = $outdir.'tmp';
 if($out_name)
 {
-	$tmpdir = $outdir.$out_name.'_tmp/';
+	$tmpdir = $outdir.$out_name.'_tmp';
 }
-unless(-e $tmpdir)
-{
-	system 'mkdir -p '.$tmpdir;
-}
+$tmpdir = add_slash_to_dir($tmpdir, $windows);
+
+makedir($tmpdir, $windows);
+
 my $date = get_date();
 my $out = $outdir.'ltg.tsv';
 my $log = $outdir.'ltg.log';
@@ -115,11 +115,8 @@ open(LOG, '>', $log) or die "Cannot open $log\n";
 my @params = print_params_hash_to_log(\%params);
 print LOG @params;
 
-
-
-
-
 my $t = time;
+
 ####
 # read ltg params to hash
 print "Reading ltg parameters\n";
@@ -154,7 +151,6 @@ unless($taxonomy)
 		exit;
 	}
 	$taxonomy = make_taxonomy_with_rank_levels($ncbitax_dir, $outdir, $date);
-	
 }
 
 ####
@@ -182,7 +178,7 @@ foreach my $fas (@fastas)
 	{
 		$blastout = $fas;
 		$blastout =~ s/\.fasta/_blastout.tsv/;
-		local_blast($blast_path, $blast_db, $fas, $blastout, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs, 'linux');
+		local_blast($blast_db, $fas, $blastout, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs);
 	}
 	####
 	# read blast results to hash
@@ -230,10 +226,10 @@ else
 ####
 # Deleting temporary files
 ####
+
 if($delete_tmp)
 {
-	print "Deleting temporary files\n";
-	system 'rm -r '.$tmpdir;
+	delete_dir($tmpdir, $windows);
 }
 
 
@@ -242,6 +238,25 @@ print LOG "Runtime: ", time - $t, "s\n";
 close LOG;
 exit;
 
+
+################################################
+
+sub delete_dir
+{
+	my ($dir, $windows) = @_;
+	
+	print "Deleting temporary files\n";
+	if($windows)
+	{
+		system 'del "'.$dir.'"*.tsv';
+		system 'del "'.$dir.'"*.fasta';
+		system 'rmdir "'.$dir.'" \q';
+	}
+	else
+	{
+		system 'rm -r "'.$dir.'"';
+	}
+}
 
 #######################################################
 sub print_help
@@ -259,20 +274,20 @@ usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTD
                           only necessary if no -taxonomy file is provided
                           taxonomy file can be created from these files if all sequences in the blast_db have ncbi taxids
   -blast_db               name of the blast database
-  -outdir                 name of the otput directory
-  -out_name               alpha-numeric string for naming output files
   -ltg_params             tsv file wih the following tab separated columns:
                           pid pcov phit taxn seqn refres ltgres
+  -outdir                 name of the otput directory
+  -out_name               alpha-numeric string for naming output files
   -blastout               if empty, run blast; otherwise this file is used to make ltg
   -delete_tmp             0/1; if 1 delete temporary files after the run
  BLAST parameters
-  -blast_path             path to blast executables
   -task                   megablast/blastn
   -blast_e                maximum e-value
   -dust                   yes/no
   -max_target_seqs        maximum number of blast hits per query
   -num_threads            number of threads
   -qcov_hsp_perc          minium query coverage in blast
-  -batch_size             batch size for blast', "\n";
+  -batch_size             batch size for blast
+  -windows                0/1, set to one if running on windows', "\n";
   exit;
 }

@@ -9,21 +9,21 @@ library(ggExtra)
 #install.packages("ggExtra") 
 
 
-setwd("~/mkLTG/benchmark/graphs")
+setwd("~/mkLTG/optimize/graphs")
 
 # read results of the variable pidentity runs
-df1<-read.table(file = file.path('~/mkLTG/benchmark/series1/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
-df2<-read.table(file = file.path('~/mkLTG/benchmark/series2/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
-df3<-read.table(file = file.path('~/mkLTG/benchmark/series3/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
-df4<-read.table(file = file.path('~/mkLTG/benchmark/series4/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
-df5<-read.table(file = file.path('~/mkLTG/benchmark/series5/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
+df1<-read.table(file = file.path('~/mkLTG/optimize/series1/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
+df2<-read.table(file = file.path('~/mkLTG/optimize/series2/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
+df3<-read.table(file = file.path('~/mkLTG/optimize/series3/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
+df4<-read.table(file = file.path('~/mkLTG/optimize/series4/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
+df5<-read.table(file = file.path('~/mkLTG/optimize/series5/LTG_pid_variable/stat_match.tsv'), sep = '\t', header = TRUE)
 
 # read results of the fixed pidentity runs
-dff1<-read.table(file = file.path('~/mkLTG/benchmark/series1/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
-dff2<-read.table(file = file.path('~/mkLTG/benchmark/series2/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
-dff3<-read.table(file = file.path('~/mkLTG/benchmark/series3/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
-dff4<-read.table(file = file.path('~/mkLTG/benchmark/series4/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
-dff5<-read.table(file = file.path('~/mkLTG/benchmark/series5/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
+dff1<-read.table(file = file.path('~/mkLTG/optimize/series1/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
+dff2<-read.table(file = file.path('~/mkLTG/optimize/series2/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
+dff3<-read.table(file = file.path('~/mkLTG/optimize/series3/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
+dff4<-read.table(file = file.path('~/mkLTG/optimize/series4/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
+dff5<-read.table(file = file.path('~/mkLTG/optimize/series5/LTG_pid_fix/stat_match.tsv'), sep = '\t', header = TRUE)
 
 # rename variables df
 varnames <-  c("param_setting","pid","pcov","phit","taxn","seqn","refres","ltgres", "taxlevel","taxlevel_index","TP","FP","FN")

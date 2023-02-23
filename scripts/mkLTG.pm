@@ -3,13 +3,27 @@ use warnings;
 #################################################
 sub add_slash_to_dir
 {
- my ($dir) = @_;
+ my ($dir, $windows) = @_;
 
- unless($dir eq '')
+ if($windows)
  {
-	 unless($dir =~  /\\$/ or $dir =~  /\/$/)
+	 $dir =~ s/\//\\/g;
+	 unless($dir eq '')
 	 {
+		 unless($dir =~  /\\$/)
+		 {
+			$dir .= '\\';
+		 }
+	 }
+ }
+ else
+ {
+	 unless($dir eq '')
+	 {
+		 unless($dir =~  /\/$/)
+		 {
 			$dir .= '/';
+		 }
 	 }
  }
  return $dir;
@@ -178,6 +192,24 @@ sub check_input_file_type_and_read_seqs
 }
 
 #################################################
+
+sub delete_file
+{
+	my ($file, $windows) = @_;
+	
+#	print "Deleting temporary files\n";
+	if($windows)
+	{
+		system 'del "'.$file.'"';
+	}
+	else
+	{
+		system 'rm '.$file;
+	}
+}
+
+
+#################################################
 sub get_date
 {
 	my @date = localtime;
@@ -254,32 +286,51 @@ sub get_lineage_list
 	return @lin;
 }
 
+##############################################
+
+sub get_taxlevel
+{
+	my ($taxid, $tax_ranked_lineage, $tax_rank) = @_;
+	#my %tax_ranked_lineage =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+	my $taxlevel = 0;
+	
+	my %hash = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1); # numerical score for each majot tax level
+	my %hash2 = (0=>9, 1=>8, 2 => 7,  3=> 6, 4=> 5, 5=> 4,  6=>3 , 7=> 2, => 8, => 1,  9=> 0); # transform position in @{$ranked_lin{taxid}} => to numerical score
+
+	if(exists $hash{$$tax_rank{$taxid}}) # get numerical score for major taxlevels
+	{
+		$taxlevel =  $hash{$$tax_rank{$taxid}};
+	}
+	else # taxlevel between major taxlevels => get an itermediate score (e.g. 7.5 for taxa between genus and species, 8.5 for bellow species)
+	{
+		for(my $i = 1; $i < 9; ++$i)
+		{
+			if($$tax_ranked_lineage{$taxid}[$i])
+			{
+				$taxlevel = $hash2{$i} + 0.5;
+				last;
+			}
+		}
+	}
+	return $taxlevel;
+}
+
 ###############################################################
 sub local_blast
 {
-my ($path, $db, $input_fas, $outfile, $e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs, $sys) = @_;
+my ($db, $input_fas, $outfile, $e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs) = @_;
 
-my $blast;
-if ($sys eq 'win')
-{
-	$blast = '"'.$path.'\blastn.exe" -task '.$task.' -db "'.$db.'" -query "'.$input_fas.'" -evalue '.$e.' -out "'.$outfile.'" -outfmt "'.$outfmt.'" -dust '.$dust.' -qcov_hsp_perc '.$qcov_hsp_perc.' -perc_identity '.$perc_identity.' -num_threads '.$num_threads;
+	my $blast = 'blastn -task '.$task.' -db "'.$db.'" -query "'.$input_fas.'" -evalue '.$e.' -out "'.$outfile.'" -outfmt "'.$outfmt.'" -dust '.$dust.' -qcov_hsp_perc '.$qcov_hsp_perc.' -perc_identity '.$perc_identity;
+	if($num_threads)
+	{
+		$blast .= ' -num_threads '.$num_threads;
 	
+	}
 	if($max_target_seqs)
 	{
 		$blast .= ' -max_target_seqs '.$max_target_seqs;
 	}
-}
-else
-{
-	$blast = $path.'blastn -task '.$task.' -db "'.$db.'" -query "'.$input_fas.'" -evalue '.$e.' -out "'.$outfile.'" -outfmt "'.$outfmt.'" -dust '.$dust.' -qcov_hsp_perc '.$qcov_hsp_perc.' -perc_identity '.$perc_identity.' -num_threads '.$num_threads;
-
-	if($max_target_seqs)
-	{
-		$blast .= ' -max_target_seqs '.$max_target_seqs;
-	}
-}
-system $blast;
-
+	system $blast;
 }
 
 ###############################################################
@@ -385,6 +436,26 @@ sub ltg
 	
 	
 
+}
+
+###############################################################
+
+sub makedir
+{
+	my ($dir, $windows) = @_;
+	
+	
+	unless(-e $dir)
+	{
+		if($windows)
+		{
+			system 'mkdir "'.$dir.'"';
+		}
+		else
+		{
+			system 'mkdir -p "'.$dir.'"';
+		}
+	}
 }
 
 
@@ -725,6 +796,76 @@ sub read_ltg_params_to_hash
 	return $pident[0]; # return the lowest value of %identity => this will be used in blast to avoid hits with lower values
 }
 
+#########################################################
+sub read_ncbitax_rankedlin
+{
+my ($file, $ranked_lin) = @_;
+# $ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+# taxname is a scietific name of the taxid, there is allways one but only one scientific name for the taxon
+
+	unless(open(IN, $file))
+	{
+		print "Cannot open $file\n";
+	}
+
+	while(my $line = <IN>)
+	{
+		chomp $line;
+		$line =~ s/\s$//;
+		$line =~  s/\t\|//g;
+		my @line = split("\t", $line);
+		my $taxid = shift@line;
+		@{$$ranked_lin{$taxid}} = @line;
+	}
+	close IN;
+}
+
+#############################################
+sub read_new_nodes_dmp_to_hash
+{
+my ($file, $par, $rank) = @_;
+
+	# $tax_par{taxid} = taxid parent
+	# $tax_par{taxid} = rank
+	
+unless(open(IN, $file))
+{
+	print "Cannot open $file\n";
+}
+
+while(my $line = <IN>)
+{
+	chomp $line;
+	$line =~ s/\s$//;
+	$line =~  s/\t\|//g;
+	my @line = split('\t', $line);
+	
+	$$par{$line[0]} = $line[1];
+	$$rank{$line[0]} = $line[2];
+}
+close IN;
+}
+
+#############################################
+sub read_new_merged_dmp_to_hash
+{
+my ($file, $merged) = @_;
+	# $merged{valid_taxid} = (old taxid list)
+
+
+	open(IN, $file) or die "Cannot open $file\n";
+
+
+	while(my $line = <IN>)
+	{
+		chomp $line;
+		$line =~ s/\s$//;
+		$line =~  s/\t\|//g;
+		my @line = split('\t', $line);;
+		push(@{$$merged{$line[1]}}, $line[0]);
+	}
+	close IN;
+}
 ###############################################################
 sub read_taxonomy_to_hashes
 {

@@ -5,35 +5,35 @@ use FindBin qw( $RealBin );
 use lib "$RealBin";
 use mkLTG;
 
-# input:
-# 	sequences.tsv of COInr
-#	taxonomy file of COInr
+# INPUT:
+# 	sequences.tsv # seqID	taxID	sequence (COInr https://zenodo.org/record/6555985)
+#	taxonomy file # tax_id	parent_tax_id	rank	name_txt	old_tax_id	taxlevel	synonyms (https://zenodo.org/record/6555985)
 
 # ALGO
-# 	random select $seqn sequences from COInr (sequences can be restricetd to a given resolution; e.g. get only sequences assigned to species)
+# 	random select $seqn sequences from input tsv (sequences can be restricted to a given resolution; e.g. get only sequences assigned to species)
 #	make a fasta with selected sequences => these will be used later as a query to test mkLTG
-#	make a sequence with all COInr sequneces except for the selected ones => reduced_DB
+#	make a tsv file with all COInr sequneces except for the selected ones => reduced_DB
 #	make BLASTDB from the reduced_DB
 #	BLAST the selected sequences against the reduced database
 
 
 my %params = 
 (
-	'db_tsv' => '/home/meglecz/mkCOInr/COInr/COInr.tsv', # seqID	taxID	sequence
-	'taxonomy' => '/home/meglecz/mkCOInr/COInr/taxonomy.tsv', # tax_id	parent_tax_id	rank	name_txt	old_tax_id	taxlevel	synonyms
+	'db_tsv' => '', # seqID	taxID	sequence
+	'taxonomy' => '', # tax_id	parent_tax_id	rank	name_txt	old_tax_id	taxlevel	synonyms
 	'seqn' => 1000,
-	'select_taxlevel' => 'species', # selet sequences assiged exactly to this resolution
-	'outdir' => '/home/meglecz/mkLTG/benchmark/series1',
+	'select_taxlevel' => '', # selet sequences assiged exactly to this resolution
+	'outdir' => '',
 	# BLAST parameters
-	'blast_path' => '',
 	'task' => 'megablast',
 	'blast_e' => 1e-20,
 	'dust' => 'yes',
 	'max_target_seqs' => 0, # if zero' =>> 500
-	'num_threads' => 8,
+	'num_threads' => 4,
 	'pid' => 70,
 	'qcov_hsp_perc' => 70,
-	'delete_tmp' => 1
+	'delete_tmp' => 1,
+	'windows' => 0 # set to 1 if running on windows
 );
 modify_params_from_tags(\%params, \@ARGV);
 
@@ -46,7 +46,6 @@ my $seqn = $params{seqn};
 my $select_taxlevel = $params{select_taxlevel}; 
 my $outdir = $params{outdir}; 
 # BLAST parameters
-my $blast_path = $params{blast_path}; 
 my $task = $params{task}; 
 my $blast_e = $params{blast_e}; 
 my $dust = $params{dust}; 
@@ -55,16 +54,15 @@ my $num_threads = $params{num_threads};
 my $pid = $params{pid}; 
 my $qcov_hsp_perc = $params{qcov_hsp_perc}; 
 my $delete_tmp = $params{delete_tmp}; 
+my $windows = $params{windows}; 
 
 my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'superkingdom');
 my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1);
 
 
-$outdir = add_slash_to_dir($outdir);
-unless(-e $outdir)
-{
-	system 'mkdir -p '.$outdir;
-}
+$outdir = add_slash_to_dir($outdir, $windows);
+makedir($outdir, $windows);
+
 my $date = get_date();
 my $t = time;
 my $log = $outdir.'make_test_files.log';
@@ -89,8 +87,7 @@ read_taxonomy_to_hashes($taxonomy, \%tax, \%merged);
 	my $db_lo = $outdir.'reduced_DB.fas';
 	my $taxids_lo = $outdir.'taxids_reduced_DB.tsv'; # seqID	taxID
 
-if(1)
-{
+
 my $select_rank = $taxrank_ind{$select_taxlevel};
 
 	open(IN, $db_tsv) or die "Cannot open $db_tsv\n";
@@ -98,7 +95,6 @@ my $select_rank = $taxrank_ind{$select_taxlevel};
 	close IN;
 	my $title = shift @db; # eliminate title line
 	my $n = scalar @db; # total number of sequences
-
 
 	####
 	# random select sequences
@@ -144,23 +140,23 @@ my $select_rank = $taxrank_ind{$select_taxlevel};
 	close DBFAS;
 	close TID;
 
-
 	####
 	# Make BLAST db and run ltg
 	####
-	my $makeblastdb = $blast_path.'makeblastdb -dbtype nucl -in '.$db_lo.' -parse_seqids -taxid_map '.$taxids_lo;
+	my $makeblastdb = 'makeblastdb -dbtype nucl -in "'.$db_lo.'" -parse_seqids -taxid_map "'.$taxids_lo.'"';
+	print $makeblastdb, "\n";
 	system $makeblastdb;
-}
+
 	####
 	# BLAST random sequences against LO DB
 	####
 	my $blastout = $outdir.'blastout_random_seq.tsv';
-	local_blast($blast_path, $db_lo, $fas, $blastout, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $pid, $num_threads, $max_target_seqs, 'linux');
+	local_blast($db_lo, $fas, $blastout, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $pid, $num_threads, $max_target_seqs);
 
 if($delete_tmp)
 {
-	system 'rm '.$db_lo;
-	system 'rm '.$taxids_lo;
+	delete_file($db_lo, $windows);
+	delete_file($taxids_lo, $windows);
 }
 
 print "Runtime ", time - $t, " seconds\n"; 
@@ -203,27 +199,19 @@ my ($number) =@_;
 sub print_help
 {
 print '
-usage: perl make_LO_db.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
-                  -outdir OUTDIR -ltg_params PARMETER_FILE
+usage: perl make_test_files.pl [-options] -db_tsv INPUT_TSV_FILE -taxonomy TAXONOMY 
+                  -outdir OUTDIR
  arguments:
  
- TO B€ DONE!!!!!!!!!!!!!!!!
- 
- 
-  -in                     name of the input file containg the sequences to be assigned
+  -db_tsv                 tsv file with the following columns: seqID taxID sequence
                           fasta or tsv format (tab separated file with a column titled sequence)
   -taxonomy               tsv file with the following tab separated columns: 
                           taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
-  -ncbitax_dir            directory of ncbi taxonomy dmp files (https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/)
-                          only necessary if no -taxonomy file is provided
-                          taxonomy file can be created from these files if all sequences in the blast_db have ncbi taxids
-  -blast_db               name of the blast database
   -outdir                 name of the otput directory
-  -ltg_params             tsv file wih the following tab separated columns:
-                          pidentity pcoverage phits min_tax_n min_seq_n min_ref_resolution max_ltg_resolution
+  -seqn                   number of sequences to select randomly
+  -select_taxlevel        select sequences with a given taxonomic rank
   -delete_tmp             0/1; if 1 delete temporary files after the run
  BLAST parameters
-  -blast_path             path to blast executables
   -task                   megablast/blastn
   -blast_e                maximum e-value
   -dust                   yes/no
@@ -231,7 +219,7 @@ usage: perl make_LO_db.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db
   -num_threads            number of threads
   -qcov_hsp_perc          minium query coverage in blast
   -pid                    minimum % of identity in blast
-  -batch_size             batch size for blast', "\n";
+  -windows                set to one if running on windows', "\n";
   exit;
 
 }

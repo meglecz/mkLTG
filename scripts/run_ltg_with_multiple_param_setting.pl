@@ -16,12 +16,13 @@ use mkLTG;
 
 my %params = 
 (
-	'fas' => '/home/meglecz/mkLTG/benchmark/series1_test/random_seq.fas',
-	'taxonomy' => '/home/meglecz/mkCOInr/COInr/taxonomy.tsv', # tax_id	parent_tax_id	rank	name_txt	old_tax_id	taxlevel	synonyms
-	'blastout' => '/home/meglecz/mkLTG/benchmark/series1_test/blastout_random_seq.tsv',
-	'outdir' => '/home/meglecz/mkLTG/benchmark/series1_test/LTG_pid_fix',
-	'ltg_params_dir' => '/home/meglecz/mkLTG/benchmark/param_files_pid_fix_test',
-	'delete_tmp' => 1
+	'fas' => '',
+	'taxonomy' => '', # tax_id	parent_tax_id	rank	name_txt	old_tax_id	taxlevel	synonyms
+	'blastout' => '',
+	'outdir' => '',
+	'ltg_params_dir' => '',
+	'delete_tmp' => 1,
+	'windows' => 0
 );
 
 modify_params_from_tags(\%params, \@ARGV);
@@ -32,17 +33,16 @@ my $blastout = $params{blastout};
 my $outdir = $params{outdir}; 
 my $ltg_params_dir = $params{ltg_params_dir};
 my $delete_tmp = $params{delete_tmp};
+my $windows = $params{windows};
 
 my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'superkingdom');
 my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1);
 my @param_list = ('pid','pcov','phit','taxn','seqn','refres','ltgres');
 
-$outdir = add_slash_to_dir($outdir);
-$ltg_params_dir = add_slash_to_dir($ltg_params_dir);
-unless(-e $outdir)
-{
-	system 'mkdir -p '.$outdir;
-}
+$outdir = add_slash_to_dir($outdir, $windows);
+makedir($outdir, $windows);
+$ltg_params_dir = add_slash_to_dir($ltg_params_dir, $windows);
+
 my $log = $outdir.'run_ltg_params.log';
 open(LOG, '>', $log) or die "Cannot open $log\n";
 my @params = print_params_hash_to_log(\%params);
@@ -61,9 +61,9 @@ read_taxonomy_to_hashes($taxonomy, \%tax, \%merged);
 
 #print $tax{218371}[3], "\n";
 
-my $stat_resolution = $outdir.'stat_resolution.tsv';
-open(RES, '>', $stat_resolution) or die "Cannot open $stat_resolution\n";
-print RES "param_setting	taxlevel	resolution_ltg	highest matching level	number of sequences\n";
+#my $stat_resolution = $outdir.'stat_resolution.tsv';
+#open(RES, '>', $stat_resolution) or die "Cannot open $stat_resolution\n";
+#print RES "param_setting	taxlevel	resolution_ltg	highest matching level	number of sequences\n";
 my $stat_match = $outdir.'stat_match.tsv';
 open(MAT, '>', $stat_match) or die "Cannot open $stat_match\n";
 print MAT "param_setting	", join("\t", @param_list);
@@ -211,10 +211,10 @@ foreach my $params (sort @ltg_params_files)
 	close LTGC;
 
 
-	foreach my $c (sort keys %count)
-	{
-		print RES $out_name, "\t", $c, "\t", $count{$c}, "\n";
-	}
+#	foreach my $c (sort keys %count)
+#	{
+#		print RES $out_name, "\t", $c, "\t", $count{$c}, "\n";
+#	}
 
 	foreach my $tl (sort keys %comp)
 	{
@@ -255,12 +255,11 @@ foreach my $params (sort @ltg_params_files)
 
 	if($delete_tmp)
 	{
-		system 'rm '.$ltg_file;
-		system 'rm '.$ltg_comp;
+		delete_file($ltg_file, $windows);
+		delete_file($ltg_comp, $windows);
 	}
-
 }# end foreach params
-close RES;
+#close RES;
 close MAT;
 
 print "Runtime: ", time - $t,  " seconds\n";
@@ -387,36 +386,20 @@ close DATA;
 sub print_help
 {
 
-print 'TO BE DONE', "\n";
-
-exit;
-
-
 print '
 usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
                   -outdir OUTDIR -ltg_params PARMETER_FILE
  arguments:
-  -in                     name of the input file containg the sequences to be assigned
-                          fasta or tsv format (tab separated file with a column titled sequence)
+  -fas                    fasta file with query sequences
+  -blastout               output of BLAST quary fasta aginst the database without the query sequences
   -taxonomy               tsv file with the following tab separated columns: 
                           taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
-  -ncbitax_dir            directory of ncbi taxonomy dmp files (https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/)
-                          only necessary if no -taxonomy file is provided
-                          taxonomy file can be created from these files if all sequences in the blast_db have ncbi taxids
-  -blast_db               name of the blast database
   -outdir                 name of the otput directory
-  -ltg_params             tsv file wih the following tab separated columns:
+  -ltg_params_dir         directory containing the parameter files: ech of them should have the following columns
                           pid pcov phit taxn seqn refres ltgres
   -delete_tmp             0/1; if 1 delete temporary files after the run
- BLAST parameters
-  -blast_path             path to blast executables
-  -task                   megablast/blastn
-  -blast_e                maximum e-value
-  -dust                   yes/no
-  -max_target_seqs        maximum number of blast hits per query
-  -num_threads            number of threads
-  -qcov_hsp_perc          minium query coverage in blast
-  -batch_size             batch size for blast', "\n";
+  -windows                set to one if running on windows', "\n";
   exit;
+
 
 }
