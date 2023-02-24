@@ -144,24 +144,8 @@ for(i in seq(1:max(df$param_setting))){ # for each param setting
 max_F1 <- max(df_pool$F1)
 print( df_pool[ which(df_pool$F1 == max_F1), ], )
 print( df[ which(df$param_setting == 21186), ], )
-#print( df_pool[ which(df_pool$hm_F1 > 0.945), ], max=1000000)
-#best_param_settings <- df_pool[ which(df_pool$hm_F1 > 0.945), 1]
-
-if(0){
-print (df[ which(df$pcov == 70 & df$phit == 70 & df$taxn == "1.1.2.3.4.4" & df$refres == "8.8.8.7.6.6"), ])
-print (df[ which(df$pcov == 80 & df$phit == 70 & df$taxn == "1.1.2.3.4.4" & df$refres == "8.8.8.7.6.6"), ])
-print (df[ which(df$pcov == 70 & df$phit == 80 & df$taxn == "1.1.2.3.4.4" & df$refres == "8.8.8.7.6.6"), ])
-print (df[ which(df$pcov == 80 & df$phit == 80 & df$taxn == "1.1.2.3.4.4" & df$refres == "8.8.8.7.6.6"), ])
-
-
-print (df_pool[ which(df_pool$pcov == 80 & df_pool$phit == 70 & df_pool$taxn == "1.1.2.3.4.4" & df_pool$refres == "8.8.8.7.6.6"), ])
-print (df_pool[ which(df_pool$pcov == 70 & df_pool$phit == 80 & df_pool$taxn == "1.1.2.3.4.4" & df_pool$refres == "8.8.8.7.6.6"), ])
-print (df_pool[ which(df_pool$pcov == 80 & df_pool$phit == 80 & df_pool$taxn == "1.1.2.3.4.4" & df_pool$refres == "8.8.8.7.6.6"), ])
-print (df_pool[ which(df_pool$pcov == 70 & df_pool$phit == 70 & df_pool$taxn == "1.1.2.3.4.4" & df_pool$refres == "8.8.8.7.6.6"), ])
-}
 
 df_pool <- df_pool %>% arrange(-F1, )
-#df_pool$F1 <- as.numeric(format(round(df_pool$F1,4)), nsmall = 4)
 write.csv(df_pool, file="parameter_settings_variable_pid_F1.tsv")
 write.csv(df[ which(df$param_setting == 21186), ], file="best_variable_pid.csv")
 
@@ -203,42 +187,8 @@ print( dff_pool[ which(dff_pool$F1 == max_dff_F1), ], )
 print( dff[ which(df$param_setting == 776), ], )
 
 dff_pool <- dff_pool %>% arrange(-F1, )
-#dff_pool$F1 <- as.numeric(format(round(dff_pool$F1,4)), nsmall = 4)
 write.csv(dff_pool, file="parameter_settings_fixed_pid_F1.tsv")
 write.csv(dff[ which(dff$param_setting == 776), ], file="best_fixed_pid.csv")
-
-if(0){
-best_100 <- dff_pool[which(dff_pool$pid ==100),]
-best_100 <- best_100[which(best_100$F1 == max(best_100$F1)),]
-write.csv(dff[ which(dff$param_setting == 380), ], file="best_pid100.csv")
-
-best_97 <- dff_pool[which(dff_pool$pid ==97),]
-best_97 <- best_97[which(best_97$F1 == max(best_97$F1)),]
-write.csv(dff[ which(dff$param_setting == 776), ], file="best_pid97.csv")
-
-best_95 <- dff_pool[which(dff_pool$pid ==95),]
-best_95 <- best_95[which(best_95$F1 == max(best_95$F1)),]
-write.csv(dff[ which(dff$param_setting == 1176), ], file="best_pid95.csv")
-
-
-best_90 <- dff_pool[which(dff_pool$pid ==90),]
-best_90 <- best_90[which(best_90$F1 == max(best_90$F1)),]
-write.csv(dff[ which(dff$param_setting == 1576), ], file="best_pid90.csv")
-
-best_85 <- dff_pool[which(dff_pool$pid ==85),]
-best_85 <- best_85[which(best_85$F1 == max(best_85$F1)),]
-write.csv(dff[ which(dff$param_setting == 1676), ], file="best_pid85.csv")
-
-best_80 <- dff_pool[which(dff_pool$pid ==80),]
-best_80 <- best_80[which(best_80$F1 == max(best_80$F1)),]
-write.csv(dff[ which(dff$param_setting == 2076), ], file="best_pid80.csv")
-}
-#dff_pool <- dff_pool %>% arrange(-as.numeric(hm_F1))
-#dff_pool <- dff_pool %>% arrange(as.numeric(FPFN))
-#df_pool <- df_pool %>% arrange(-as.numeric(hm_F1))
-#df_pool <- df_pool %>% arrange(as.numeric(FPFN))
-#df_pool_bis <- df_pool_bis %>% arrange(-as.numeric(hm_F1))
-#df_pool_bis <- df_pool_bis %>% arrange(as.numeric(FPFN))
 
 
 #########################################################
@@ -247,15 +197,11 @@ write.csv(dff[ which(dff$param_setting == 2076), ], file="best_pid80.csv")
 # order factors
 df_graph <- df
 df_graph$taxlevel <- factor(df_graph$taxlevel , levels=c("species", "genus", "family", "order", "class", "phylum", "kingdom", "superkingdom"))
-#df_low_res$taxlevel <- factor(df_low_res$taxlevel , levels=c("species", "genus", "family", "order"))
 df_graph$pcov <- factor(df_graph$pcov , levels=c(100, 90, 80, 70))
-#df_low_res$pcoverage <- factor(df_low_res$pcoverage , levels=c(100, 90, 80, 70))
 df_graph$phit <- factor(df_graph$phit , levels=c(100, 90, 80, 70))
-#df_low_res$phits <- factor(df_low_res$phits , levels=c(100, 90, 80, 70))
 
 # plots for all tax level F1
 p<- ggplot(data=df_graph, aes(x=pcov, y=F1)) +
-#p<- ggplot(data=df, aes(x=pcoverage, y=F1, fill=phits)) +
   geom_col() +
   facet_wrap(~taxlevel, nrow=4)
 p = p + labs(title = "F1 sumed over all paramater settings \nfor each %of coverage (pcov)")
@@ -267,13 +213,11 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
-ggsave("pcov_F1_all.pdf", width = 12, height = 10, units = "cm", dpi = 200)
+ggsave("pcov_F1_all.eps", width = 119, height = 100, units = "mm", dpi = 300)
 dev.off()
 
 
 p<- ggplot(data=df_graph, aes(x=phit, y=F1)) +
-#  p<- ggplot(data=df, aes(x=phits, y=F1, fill=pcoverage)) +
-  
     geom_col() +
   facet_wrap(~taxlevel, nrow=4)
 p = p + labs(title = "F1 sumed over all paramater settings \nfor each % of hits (phit)")
@@ -285,7 +229,7 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
-ggsave("phit_F1_all.pdf", width = 12, height = 10, units = "cm", dpi = 200)
+ggsave("phit_F1_all.eps", width = 119, height = 100, units = "mm", dpi = 300)
 dev.off()
 
 
@@ -301,7 +245,7 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
-ggsave("taxn_F1_all.pdf", width = 18, height = 10, units = "cm", dpi = 200)
+ggsave("taxn_F1_all.eps", width = 195, height = 100, units = "mm", dpi = 300)
 dev.off()
 
 
@@ -317,71 +261,8 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
-ggsave("refres_F1_all.pdf", width = 18, height = 10, units = "cm", dpi = 200)
+ggsave("refres_F1_all.eps", width = 195, height = 100, units = "mm", dpi = 300)
 dev.off()
-
-#########################################################
-
-if(0){
-# distribution of all F1 values
-df_pool %>%
-  ggplot( aes(x=hm_F1)) +
-  geom_density(adjust=1.5, alpha=.4)
-
-# distribution of all F1 values for each pcov
-df_pool %>%
-  ggplot( aes(x=hm_F1, group=pcov, fill=pcov)) +
-  geom_density(adjust=1.5, alpha=.4)
-
-# distribution of all F1 values for each taxn using facets
-ggplot(data=df_pool, aes(x=hm_F1, group=taxn, fill=taxn)) +
-  geom_density(adjust=1.5) +
-#  theme_ipsum() +
-  facet_wrap(~taxn) +
-  theme(
-    legend.position="none",
-    panel.spacing = unit(0.1, "lines"),
-    axis.ticks.x=element_blank()
-  )
-# distribution of all F1 values for each taxn using stacked density chart
-p <- ggplot(data=df_pool, aes(x=hm_F1, group=taxn, fill=taxn)) +
-  geom_density(adjust=1.5, position="fill")
-p
-
-
-## get only the highest F1 values and plot color them according to the 4 variables
-#df_select <- df_pool[ which(df_pool$hm_taxlevel == max_hm_F1), ]
-
-df_select <- df_pool[ which(df_pool$F1 > 0), ]
-p <- ggplot(data=df_select, aes(x=refres, y=F1, color=phit)) +
-  geom_point()
-p = p + theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1, vjust = 1))
-p
-
-df_select <- df_pool[ which(df_pool$F1 > 0), ]
-df_select <- df[ which(df$taxlevel_index ==6), ]
-p <- ggplot(data=df_select, aes(x=refres, y=F1)) +
-  geom_point()
-p = p + theme(axis.text.x = element_text(size = 5, angle = 45, hjust = 1, vjust = 1))
-p
-
-p <- ggplot(data=df_select, aes(x=param_setting, y=F1, color=pcov)) +
-  geom_point()
-p
-
-p <- ggplot(data=df_select, aes(x=param_setting, y=hm_F1, color=phit)) +
-  geom_point()
-p
-
-p <- ggplot(data=df_select, aes(x=param_setting, y=hm_F1, color=taxn)) +
-  geom_point()
-p
-
-p <- ggplot(data=df_select, aes(x=param_setting, y=hm_F1, color=refres)) +
-  geom_point()
-p
-
-}
 
 
 

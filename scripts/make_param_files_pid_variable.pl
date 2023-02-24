@@ -17,10 +17,10 @@ my @pid = (100, 97, 95, 90, 85, 80); # list of pid values; same in all parametre
 my @pcov = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]); # pcov values for each pid values
 my @phit = ([100,100,100,100,100,100], [90,90,90,90,90,90], [80,80,80,80,80,80], [70,70,70,70,70,70]); # phit values for each pid values
 
-my @taxn = ([1], [1], [2], [3], [4], [4]);
-#my @taxn = ([1], [1,2], [2,3,4], [3,4], [4,5], [4,5]); # taxn values for each pid values
-#my @refres = ([8], [8,7], [8,7], [8,7,6], [7,6,5], [6,5,4]); # refres values for each pid values; 8 species, 7 genus, 6 familly, 6 order, 5 class
-my @refres = ([8], [8], [8], [8], [7], [6]);
+#my @taxn = ([1], [1], [2], [3], [4], [4]);
+my @taxn = ([1], [1,2], [2,3,4], [3,4], [4,5], [4,5]); # taxn values for each pid values
+my @refres = ([8], [8,7], [8,7], [8,7,6], [7,6,5], [6,5,4]); # refres values for each pid values; 8 species, 7 genus, 6 familly, 6 order, 5 class
+#my @refres = ([8], [8], [8], [8], [7], [6]);
 ##########################
 ##########################
 my @ltgres = ();

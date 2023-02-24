@@ -9,13 +9,12 @@ use mkLTG;
 # Nucleotide BLAST 2.10.1+
 
 # INPUT:
-# fasta file or a tsv with a column 'sequence', 
-# 	the format is guessed from the filename (.tsv .csv .fasta .fas .fsa)
-# blast database 
-# taxonomy file : tsv file with the following tab separated columns: taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
+# -fasta file with sequnces to be assigned
+# -blast database 
+# -taxonomy file : tsv file with the following tab separated columns: taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
 # 	if the taxonomy file does not exists, it can be created based on the ncbi taxonomy dmp files downloaded from
 #	https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/. In that case, all sequences in the blast_db must have ncbi taxids
-# ltg_params.tsv : ltg parameters applided for each %identity level
+# -ltg_params.tsv : ltg parameters applided for each %identity level
 #	tab separated file with the following columns:  pid, pcov, phit, taxn, seqn, refres, ltgres
 
 # ALGO
@@ -46,7 +45,7 @@ use mkLTG;
 
 my %params = 
 (
-	'in' => '', # could be a fasta file or a tsv with a column 'sequence' 
+	'in' => '', # fasta file with sequnces to be assigned
 	'taxonomy' => '',# if empty file is created from ncbi tax dmp files
 	'ncbitax_dir' => '', # unless $taxonomy, make a taxonomy file including rank levels; can be emty if $taxonomy extists
 	'blast_db' => '',
@@ -218,7 +217,7 @@ if($input_format eq 'fasta')
 {
 	print_ltg_fasta_input(\%ltg, $out, \%seq);
 }
-else
+elsif(0)
 {
 	print_ltg_tsv_input(\%ltg, $out, \%seq, $in);
 }
@@ -266,8 +265,7 @@ print '
 usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
                   -outdir OUTDIR -ltg_params PARMETER_FILE
  arguments:
-  -in                     name of the input file containg the sequences to be assigned
-                          fasta or tsv format (tab separated file with a column titled sequence)
+  -in                     name of the input fasta file containg the sequences to be assigned
   -taxonomy               tsv file with the following tab separated columns: 
                           taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
   -ncbitax_dir            directory of ncbi taxonomy dmp files (https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/)

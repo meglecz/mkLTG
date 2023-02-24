@@ -53,6 +53,33 @@ Alternatively, you can download the COInr database from zenodo https://zenodo.or
 For the sake of this tutorial I have the following file system:
 
 ~~~~
+~/mkLTG
+├── COInr_for_vtam_2022_05_06_dbV5
+│   ├── COInr_for_vtam.ndb
+│   ├── COInr_for_vtam.nhr
+│   ├── COInr_for_vtam.nin
+│   ├── COInr_for_vtam.nog
+│   ├── COInr_for_vtam.nos
+│   ├── COInr_for_vtam.not
+│   ├── COInr_for_vtam.nsq
+│   ├── COInr_for_vtam.ntf
+│   ├── COInr_for_vtam.nto
+│   ├── COInr_for_vtam_taxonomy.tsv
+│   └── format_db.log
+├── data
+│   └── test.fas
+├── params
+│   └── params_default.tsv
+├── README.md
+└── scripts
+    ├── compair_params.R
+    ├── make_param_files_pid_fix.pl
+    ├── make_param_files_pid_variable.pl
+    ├── make_test_files.pl
+    ├── mkLTG.pl
+    ├── mkLTG.pm
+    └── run_ltg_with_multiple_param_setting.pl
+
 ~~~~
 
 The files in COInr_for_vtam_2022_05_06_dbV5 were downloaded form https://osf.io/vrfwz/
@@ -65,7 +92,7 @@ All other files are provided with mkLTG.
 ~~~
 cd mkLTG
 
-perl scripts/mkLTG.pl -in data/test1.fas -taxonomy COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam_taxonomy.tsv -blast_db COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam -outdir out -out_name test -ltg_params params/params_default.tsv
+perl scripts/mkLTG.pl -in data/test.fas -taxonomy COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam_taxonomy.tsv -blast_db COInr_for_vtam_2022_05_06_dbV5/COInr_for_vtam -outdir out -out_name test -ltg_params params/params_default.tsv
 ~~~
 
 **Windows**
@@ -73,7 +100,7 @@ perl scripts/mkLTG.pl -in data/test1.fas -taxonomy COInr_for_vtam_2022_05_06_dbV
 ~~~
 cd mkLTG
 
-perl scripts\mkLTG.pl -in data\test1.fas -taxonomy COInr_for_vtam_2022_05_06_dbV5\COInr_for_vtam_taxonomy.tsv -ncbitax_dir '' -blast_db COInr_for_vtam_2022_05_06_dbV5\COInr_for_vtam -outdir out -out_name test -ltg_params params\params_default.tsv -windows 1
+perl scripts\mkLTG.pl -in data\test.fas -taxonomy COInr_for_vtam_2022_05_06_dbV5\COInr_for_vtam_taxonomy.tsv -ncbitax_dir '' -blast_db COInr_for_vtam_2022_05_06_dbV5\COInr_for_vtam -outdir out -out_name test -ltg_params params\params_default.tsv -windows 1
 ~~~
 
 ### Algorithm
@@ -100,7 +127,7 @@ mkLTG starts at the highest pid value of the parameter setting. If LTG cannot be
 
 ### Arguments and options
 
- - **in**: Name of the input file containing the sequences to be assigned. Can be fasta or tsv format (tab separated file with a column titled sequence); Compulsory
+ - **in**: Name of the input fasta file containing the sequences to be assigned. Compulsory
  - **blast_db**: name of the blast database;  Compulsory
  - **taxonomy**: TSV file with the following tab separated columns: taxid, parent_taxid, taxlevel, taxname, merged_taxid, taxlevel_index;  Either taxonomy or ncbitax_dir is compulsory
  - **ncbitax_dir**: Directory of ncbi taxonomy dmp files (downloaded from https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/) Only necessary if no **taxonomy** file is provided. The taxonomy file is automatically created from the dmp files and cen be used if all sequences have NCBI taxIDs;  Either taxonomy or ncbitax_dir is compulsory
@@ -131,7 +158,7 @@ Randomly select 1000 sequences (seqn) from the COInr.tsv (db_tsv) file (download
 The randomy selected sequences (random_seq.fas) will be used as queries for the evaluation of the parameter settings, and the remaining sequences are formatted for blast (reduced_DB.fas). The random_seq.fas is BLASTed against the reduced_DB.fas database.
 
 ~~~~
-perl scripts\make_test_files.pl -db_tsv COInr\COInr_10000.tsv -taxonomy COInr\taxonomy.tsv -seqn 100 -select_taxlevel species -outdir optimize\series1 -windows 1 
+perl scripts/make_test_files.pl -db_tsv COInr/COInr.tsv -taxonomy COInr/taxonomy.tsv -seqn 1000 -select_taxlevel species -outdir optimize/series1
 ~~~~
 
 ### Make parameter files using variable pid
@@ -139,7 +166,7 @@ perl scripts\make_test_files.pl -db_tsv COInr\COInr_10000.tsv -taxonomy COInr\ta
 Make parameter files for a large number of parameter value combinations. The possibe parameter values can be set by editing lines 16-22  in the script. This script produces parameter files with multiple pid values. To reduce the number of parameter files, pcov and phits are fixed within each parameter settings (same values for different pids). seqn is the same as taxn, and ltgres is a resolution higher than refres.
 
 ~~~~
-perl scripts\make_param_files_pid_variable.pl -windows 1 -outdir optimize\param_files_pid_variable
+perl scripts/make_param_files_pid_variable.pl -outdir optimize/param_files_pid_variable
 ~~~~
 
 ###  Make parameter files using a singe pid per parametre setting
@@ -147,7 +174,7 @@ perl scripts\make_param_files_pid_variable.pl -windows 1 -outdir optimize\param_
 Make parameter files for a large number of parameter value combinations. The possibe parameter values can be set by editing lines 15-19  in the script. This script produces parameter files with a single pid values. To reduce the number of parameter files,  seqn is the same as taxn, and ltgres is a resolution higher than refres.
 
 ~~~~
-perl scripts\make_param_files_pid_fix.pl -windows 1 -outdir optimize\param_files_pid_fix
+perl scripts/make_param_files_pid_fix.pl -outdir optimize/param_files_pid_fix
 ~~~~
 
 ### Run mkLTG for all parameter files 
@@ -158,15 +185,15 @@ At each major taxonomic level, count the number of sequences correctly assigned 
 
 #### Variable pid 
 ~~~~
-perl scripts\run_ltg_with_multiple_param_setting.pl -fas optimize\series1\random_seq.fas -taxonomy COInr\taxonomy.tsv -blastout optimize\series1\blastout_random_seq.tsv -outdir optimize\series1\LTG_pid_variable -ltg_params_dir optimize\param_files_pid_variable -windows 1
+perl scripts/run_ltg_with_multiple_param_setting.pl -fas optimize/series1/random_seq.fas -taxonomy COInr/taxonomy.tsv -blastout optimize/series1/blastout_random_seq.tsv -outdir optimize/series1/LTG_pid_variable -ltg_params_dir optimize/param_files_pid_variable
 ~~~~
 
 #### Fix pid
 ~~~~
-perl scripts\run_ltg_with_multiple_param_setting.pl -fas optimize\series1\random_seq.fas -taxonomy COInr\taxonomy.tsv -blastout optimize\series1\blastout_random_seq.tsv -outdir optimize\series1\LTG_pid_fix -ltg_params_dir optimize\param_files_pid_fix -windows 1
+perl scripts/run_ltg_with_multiple_param_setting.pl -fas optimize/series1/random_seq.fas -taxonomy COInr/taxonomy.tsv -blastout optimize/series1/blastout_random_seq.tsv -outdir optimize/series1/LTG_pid_fix -ltg_params_dir optimize/param_files_pid_fix
 ~~~~
 
 ### Calculate F1 score, get the parameter setting with the highest F1, make graphs
 
-Adapt the **compair_params.R** script to your use
+Adapt the **compare_params.R** script to your use
 

@@ -177,15 +177,17 @@ sub check_input_file_type_and_read_seqs
 	}
 	elsif($in =~ /\.[tc]sv/i)
 	{
+		print "The TSV/CSV input format is not yet implemented\n";
+		exit;
 		$input_format = 'tsv';
 		%$seq = check_and_read_tsv($in);
 	}
 	else
 	{
-		print "The input file should be either 
-    - fasta file 
-    or 
-    - tsv file:  tab separated columns and one of the columns must have 'sequence' as a heading\n";
+		print "The input file should be in fasta format\n"; 
+#    - fasta file 
+#    or 
+#    - tsv file:  tab separated columns and one of the columns must have 'sequence' as a heading\n";
     exit;
 	}
 	return $input_format;
@@ -584,25 +586,50 @@ sub modify_params_from_tags
 	my ($param, $inp) = @_;
 
 	my @bad_tags = ();
+	my $version = 0;
+	my $help = 0;
 	for(my $i = 0; $i<scalar@$inp; $i=$i+2)
 	{
-#		print 
 		$$inp[$i] =~ s/^-*//;
-		if(exists $$param{$$inp[$i]})
+		if($$inp[$i] =~ /version/i)
 		{
-			$$param{$$inp[$i]} = $$inp[$i+1];
+			$version = 1;
+		}
+		elsif($$inp[$i] eq 'h' or $$inp[$i] =~ /help/i)
+		{
+			$help = 1;
 		}
 		else
 		{
-			push(@bad_tags, $$inp[$i]);
+			if(exists $$param{$$inp[$i]})
+			{
+				$$param{$$inp[$i]} = $$inp[$i+1];
+			}
+			else
+			{
+				push(@bad_tags, $$inp[$i]);
+			}
 		}
 	}
+	
+	if($version)
+	{
+		print_version();
+		exit;
+	}
+
 	if(scalar @bad_tags > 0)
 	{
-		print "The following tags are not accepted: @bad_tags\n";
+		print_help();
+		print "The following tags are not accepted: \n", join(' ', @bad_tags), "\n";
+		exit;
+	}
+	if($help)
+	{
 		print_help();
 		exit;
 	}
+
 }
 
 ###############################################################
@@ -688,6 +715,14 @@ sub print_params_hash_to_log
 	}
 	push(@print, "\n####\n\n");
 	return @print;
+}
+#######################################################
+
+
+sub print_version
+{
+	print "####################\nmkLTG-0.1.0\n";
+	print "February 24, 2023\n####################\n";
 }
 
 ###############################################################
