@@ -125,7 +125,7 @@ my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phyl
 my %ltg_params; # $ltg_params{pid}{pcov/phit/taxn/seqn/refres/ltgres} = value
 # $perc_identity is the lowest value in the $ltg_params file
 my $perc_identity = read_ltg_params_to_hash($ltg_params, \%ltg_params, \%taxrank_ind);
-
+print_param_setting_to_log(\%ltg_params);
 
 ####
 # read input files and check format
@@ -237,7 +237,26 @@ print LOG "Runtime: ", time - $t, "s\n";
 close LOG;
 exit;
 
+################################################
 
+sub print_param_setting_to_log
+{
+	my($ltg_params) = @_;
+# $ltg_params{pid}{pcov/phit/taxn/seqn/refres/ltgres} = value
+
+	my @p = ('pcov','phit','taxn','seqn','refres','ltgres');
+	print LOG "pid	", join("\t", @p), "\n";
+	foreach my $pid (sort {$a <=> $b} keys %$ltg_params)
+	{
+		print LOG "$pid";
+		foreach my $p (@p)
+		{
+			print LOG "	$$ltg_params{$pid}{$p}";
+		}
+		print LOG "\n",
+	}
+
+}
 ################################################
 
 sub delete_dir
