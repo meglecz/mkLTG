@@ -209,4 +209,4 @@ Adapt the **compare_params.R** script to your use
 
 2023-03-29
 
-Works with more sequneces than the batch size
+Works with more sequences than the batch size
