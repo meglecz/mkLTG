@@ -197,3 +197,16 @@ perl scripts/run_ltg_with_multiple_param_setting.pl -fas optimize/series1/random
 
 Adapt the **compare_params.R** script to your use
 
+
+
+## Versions
+
+**mkLTG-0.1.0** 
+
+2023-02-24
+
+**mkLTG-0.1.1**
+
+2023-03-29
+
+Works with more sequneces than the batch size
