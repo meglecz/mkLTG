@@ -213,6 +213,8 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
+ggsave("pcov_F1_all.png", width = 119, height = 100, units = "mm", dpi = 300)
+dev.off()
 ggsave("pcov_F1_all.eps", width = 119, height = 100, units = "mm", dpi = 300)
 dev.off()
 
@@ -229,6 +231,8 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
+ggsave("phit_F1_all.png", width = 119, height = 100, units = "mm", dpi = 300)
+dev.off()
 ggsave("phit_F1_all.eps", width = 119, height = 100, units = "mm", dpi = 300)
 dev.off()
 
@@ -245,6 +249,8 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
+ggsave("taxn_F1_all.png", width = 195, height = 100, units = "mm", dpi = 300)
+dev.off()
 ggsave("taxn_F1_all.eps", width = 195, height = 100, units = "mm", dpi = 300)
 dev.off()
 
@@ -261,6 +267,8 @@ p = p + theme(panel.grid.major = element_line(color = "grey", size = 0.2,linetyp
 p = p + theme(panel.border = element_rect(color = "grey",fill = NA, size = 0.5))
 p
 
+ggsave("refres_F1_all.png", width = 195, height = 100, units = "mm", dpi = 300)
+dev.off()
 ggsave("refres_F1_all.eps", width = 195, height = 100, units = "mm", dpi = 300)
 dev.off()
 

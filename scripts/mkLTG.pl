@@ -161,7 +161,7 @@ my %merged; #$merged{old_taxid} = new_taxid
 read_taxonomy_to_hashes($taxonomy, \%tax, \%merged);
 
 ####
-# make ltg for all sequences dans all of the temporary fasta files
+# make ltg for all sequences in all of the temporary fasta files
 # keep info in a %hash
 print "Making LTG\n";
 ####
@@ -173,18 +173,19 @@ foreach my $fas (@fastas)
 	# blast
 	####
 	
+	my $blastout_tmp = $blastout;
 	unless($blastout) # run blast only if BLAST output is not given in the input
 	{
-		$blastout = $fas;
-		$blastout =~ s/\.fasta/_blastout.tsv/;
-		local_blast($blast_db, $fas, $blastout, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs);
+		$blastout_tmp = $fas;
+		$blastout_tmp =~ s/\.fasta/_blastout.tsv/;
+		local_blast($blast_db, $fas, $blastout_tmp, $blast_e, $task, $outfmt, $dust, $qcov_hsp_perc, $perc_identity, $num_threads, $max_target_seqs);
 	}
 	####
 	# read blast results to hash
 	####
 	# $blastres{qid} = list of (pident length qcovhsp staxids evalue)
 	# change merged taxids to valid taxids
-	my %blastres = read_blast_results_to_hash($blastout, \%merged);
+	my %blastres = read_blast_results_to_hash($blastout_tmp, \%merged);
 
 
 	####
