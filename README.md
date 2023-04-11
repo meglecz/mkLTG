@@ -28,7 +28,7 @@ A ready to use COI database with its associated taxonomy file formated from [COI
 Alternativelly, it is possible to download the COInr database from zenodo https://zenodo.org/record/6555985, and prepare a custom database using mkCOInr (https://github.com/meglecz/mkCOInr)
 
 ### Other databases
-BLAST databases can be formated from a fasta file and a taxmap file using the following command:
+Any BLAST databases can be formated from a fasta file and a taxmap file using the following command:
 ~~~~
 makeblastdb -dbtype nucl -in FASTA_FILE -parse_seqids -taxid_map TAXMAP_FILE
 ~~~~
