@@ -9,7 +9,7 @@ use mkLTG;
 # Nucleotide BLAST 2.10.1+
 
 # INPUT:
-# -fasta file with sequnces to be assigned
+# -fasta file with sequences to be assigned OR tsv file with 'sequence' as heading for the column that contains the sequences to be assigned
 # -blast database 
 # -taxonomy file : tsv file with the following tab separated columns: taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
 # 	if the taxonomy file does not exists, it can be created based on the ncbi taxonomy dmp files downloaded from
@@ -45,7 +45,7 @@ use mkLTG;
 
 my %params = 
 (
-	'in' => '', # fasta file with sequnces to be assigned
+	'in' => '', # fasta or TSV file with sequnces to be assigned
 	'taxonomy' => '',# if empty file is created from ncbi tax dmp files
 	'ncbitax_dir' => '', # unless $taxonomy, make a taxonomy file including rank levels; can be emty if $taxonomy extists
 	'blast_db' => '',
@@ -92,24 +92,26 @@ my $outfmt = '6 qseqid sseqid pident length qcovhsp staxids evalue';
 $outdir = add_slash_to_dir($outdir, $windows);
 $ncbitax_dir = add_slash_to_dir($ncbitax_dir, $windows);
 
-# make temp dir
-my $tmpdir = $outdir.'tmp';
-if($out_name)
-{
-	$tmpdir = $outdir.$out_name.'_tmp';
-}
-$tmpdir = add_slash_to_dir($tmpdir, $windows);
 
-makedir($tmpdir, $windows);
 
 my $date = get_date();
-my $out = $outdir.'ltg.tsv';
-my $log = $outdir.'ltg.log';
+my $out = $outdir.'ltg_'.$date.'.tsv';
+my $log = $outdir.'ltg_'.$date.'.log';
 if($out_name)
 {
 	$out = $outdir.$out_name.'_ltg.tsv';
 	$log = $outdir.$out_name.'_ltg.log';
 }
+
+# make temp dir
+my $tmpdir = $outdir.'tmp_'.$date;
+if($out_name)
+{
+	$tmpdir = $outdir.$out_name.'_tmp';
+}
+$tmpdir = add_slash_to_dir($tmpdir, $windows);
+makedir($tmpdir, $windows);
+
 open(LOG, '>', $log) or die "Cannot open $log\n";
 my @params = print_params_hash_to_log(\%params);
 print LOG @params;
@@ -210,18 +212,19 @@ foreach my $fas (@fastas)
 
 ####
 # print results to an output file
-# if input was fasta, make a new file
-# if input was a tsv, complete the tsv with the taxinfo, add this info before the sequence column
+# if input was fasta, make a tsv outfile
+# if input was a tsv, copy the content in new tsv outfile and complete the tsv with the taxinfo. Add tax info before the sequence column
 print "Writing output\n";
 ####
 if($input_format eq 'fasta')
 {
 	print_ltg_fasta_input(\%ltg, $out, \%seq);
 }
-elsif(0)
+else
 {
 	print_ltg_tsv_input(\%ltg, $out, \%seq, $in);
 }
+
 
 ####
 # Deleting temporary files
@@ -285,7 +288,7 @@ print '
 usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
                   -outdir OUTDIR -ltg_params PARMETER_FILE
  arguments:
-  -in                     name of the input fasta file containg the sequences to be assigned
+  -in                     name of the input fasta or TSV file containing the sequences to be assigned; the TSV file must have "sequence" as a heading for one of the columns
   -taxonomy               tsv file with the following tab separated columns: 
                           taxid parent_taxid taxlevel taxname merged_taxid taxlevel_index
   -ncbitax_dir            directory of ncbi taxonomy dmp files (https://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/)
@@ -298,6 +301,7 @@ usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTD
   -out_name               alpha-numeric string for naming output files
   -blastout               if empty, run blast; otherwise this file is used to make ltg
   -delete_tmp             0/1; if 1 delete temporary files after the run
+  -windows                0/1, set to one if running on windows
  BLAST parameters
   -task                   megablast/blastn
   -blast_e                maximum e-value
@@ -305,7 +309,6 @@ usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTD
   -max_target_seqs        maximum number of blast hits per query
   -num_threads            number of threads
   -qcov_hsp_perc          minium query coverage in blast
-  -batch_size             batch size for blast
-  -windows                0/1, set to one if running on windows', "\n";
+  -batch_size             batch size for blast' , "\n";
   exit;
 }

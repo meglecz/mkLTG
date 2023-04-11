@@ -101,7 +101,7 @@ sub check_and_read_tsv
 	my $seq_i = -1; # get the index of the column with the sequences
 	for(my $i = 0; $i < scalar @title; ++$i)
 	{
-		if ($title[$i] =~ /^sequences*$/i)
+		if ($title[$i] =~ /^sequence$/i)
 		{
 			$seq_i = $i;
 			last;
@@ -154,7 +154,7 @@ sub check_and_read_tsv
 	}
 	else
 	{
-		print "ERROR: there are no correct sequences in the input file in the sequence column\n";
+		print "ERROR: There are no correct sequences in the input file in the sequence column\n";
 		exit;
 	}
 	close IN;
@@ -177,18 +177,13 @@ sub check_input_file_type_and_read_seqs
 	}
 	elsif($in =~ /\.[tc]sv/i)
 	{
-		print "The TSV/CSV input format is not yet implemented\n";
-		exit;
 		$input_format = 'tsv';
 		%$seq = check_and_read_tsv($in);
 	}
 	else
 	{
-		print "The input file should be in fasta format\n"; 
-#    - fasta file 
-#    or 
-#    - tsv file:  tab separated columns and one of the columns must have 'sequence' as a heading\n";
-    exit;
+		print "The input file should be either a fasta file or a tsv file (tab separated columns and one of the columns must have 'sequence' as a heading)\n";
+		exit;
 	}
 	return $input_format;
 }
@@ -657,6 +652,8 @@ sub print_ltg_fasta_input
 sub print_ltg_tsv_input
 {
 	my ($ltg, $out, $seq, $in) = @_;
+	# $ltg{seqid} = $pid	$ltg_taxid	$tax{$ltg_taxid}[2]	$tax{$ltg_taxid}[1]	", join("\t", @ranked_lin)
+	# $seq{seqid} = seq;
 	
 	#$seq_inv{sequence} = id
 	my %seq_inv = return_hash($seq);
@@ -672,7 +669,7 @@ sub print_ltg_tsv_input
 	my $seq_i = -1; # get the index of the column with the sequences
 	for(my $i = 0; $i < scalar @title; ++$i)
 	{
-		if ($title[$i] =~ /^sequences*/i)
+		if ($title[$i] =~ /^sequence$/i)
 		{
 			$seq_i = $i;
 			last;
