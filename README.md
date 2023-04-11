@@ -23,9 +23,7 @@ If you are not comfortable with git, just download the zipped package (**Code** 
 ## Reference database and taxonomy files
 
 ### COI database
-A ready to use COI database with its associated taxonomy file formated from [COInr](https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13756) for mkLTG (and **[VTAM](https://www.sciencedirect.com/science/article/pii/S200103702300034X?via%3Dihub)**) is available here:  https://osf.io/vrfwz/
-
-The COInr database is a comprehensive non-redundant database with COI sequences from NCBI-nt and BOLD databases (https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13756).
+A ready to use COI database with its associated taxonomy file formated from [COInr](https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13756) for mkLTG (and **[VTAM](https://www.sciencedirect.com/science/article/pii/S200103702300034X?via%3Dihub)**) is available here:  https://osf.io/vrfwz/ . The COInr database is a comprehensive non-redundant database with COI sequences from NCBI-nt and BOLD databases.
 
 Alternativelly, it is possible to download the COInr database from zenodo https://zenodo.org/record/6555985, and prepare a custom database using mkCOInr (https://github.com/meglecz/mkCOInr)
 
@@ -243,5 +241,5 @@ Works with more sequences than the batch size
 
 2023-04-11
 
-Input sequences can be provided by fasta or TSV format
+Input sequences can be provided in fasta or TSV format
 
