@@ -285,7 +285,7 @@ sub print_help
 {
 
 print '
-usage: perl ltg.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
+usage: perl mkLTG.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLASTDB
                   -outdir OUTDIR -ltg_params PARMETER_FILE
  arguments:
   -in                     name of the input fasta or TSV file containing the sequences to be assigned; the TSV file must have "sequence" as a heading for one of the columns
