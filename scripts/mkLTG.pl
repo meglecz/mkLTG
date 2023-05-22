@@ -310,5 +310,4 @@ usage: perl mkLTG.pl [-options] -in INPUT_FILE -taxonomy TAXONOMY -blast_db BLAS
   -num_threads            number of threads
   -qcov_hsp_perc          minium query coverage in blast
   -batch_size             batch size for blast' , "\n";
-  exit;
 }

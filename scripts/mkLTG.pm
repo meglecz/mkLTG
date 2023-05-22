@@ -606,13 +606,11 @@ sub modify_params_from_tags
 			}
 		}
 	}
-	
 	if($version)
 	{
 		print_version();
 		exit;
 	}
-
 	if(scalar @bad_tags > 0)
 	{
 		print_help();
@@ -622,6 +620,7 @@ sub modify_params_from_tags
 	if($help)
 	{
 		print_help();
+		print "*************\n";
 		exit;
 	}
 
