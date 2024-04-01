@@ -1,6 +1,8 @@
 # mkLTG
 **Taxonomic assignment of metabarcoding sequences using variable % identity thresholds**
 
+If you are using this tool, please, cite Meglécz, E. (2024). mkLTG: A command-line tool for taxonomic assignment of metabarcoding sequences using variable identity thresholds. [**Biologia Futura**.](https://link.springer.com/article/10.1007/s42977-024-00201-x) [Accepted manuscript](https://amu.hal.science/hal-04434060)
+
 ## Installation
 
 **Perl interpreter** 

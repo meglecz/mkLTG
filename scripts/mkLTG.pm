@@ -620,7 +620,6 @@ sub modify_params_from_tags
 	if($help)
 	{
 		print_help();
-		print "*************\n";
 		exit;
 	}
 
