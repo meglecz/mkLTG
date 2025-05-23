@@ -288,10 +288,10 @@ sub get_lineage_list
 sub get_taxlevel
 {
 	my ($taxid, $tax_ranked_lineage, $tax_rank) = @_;
-	#my %tax_ranked_lineage =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+	#my %tax_ranked_lineage =  (tax_name,species,genus,family,order,class,phylum,kingdom,domain)
 	my $taxlevel = 0;
 	
-	my %hash = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1); # numerical score for each majot tax level
+	my %hash = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'domain',1); # numerical score for each majot tax level
 	my %hash2 = (0=>9, 1=>8, 2 => 7,  3=> 6, 4=> 5, 5=> 4,  6=>3 , 7=> 2, => 8, => 1,  9=> 0); # transform position in @{$ranked_lin{taxid}} => to numerical score
 
 	if(exists $hash{$$tax_rank{$taxid}}) # get numerical score for major taxlevels
@@ -483,21 +483,33 @@ sub make_fastas
 sub make_ranked_lineage
 {
 	my ($taxid, $tax, $ind_taxrank) = @_;
-#my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'superkingdom');
-
+#my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'domain');
+#$tax{taxid} = (parent_taxid	taxlevel	taxname	taxlevel_index)
+ 
 	my @lineage = get_lineage_list($taxid, $tax);
 	shift(@lineage); # delete cellular organism
 	
 	my %ranks;
 	my @ranked_lin = ('','','','','','','','');
+#	print "xxx @lineage\n";
 	foreach my $tid (@lineage) # add taxa in the main levels
 	{
 		unless($$tax{$tid}[3] =~ /\./) # taxlevel index is an integer
-		{
-			$ranked_lin[$$tax{$tid}[3] - 1] = $$tax{$tid}[2];
+		{	# this is a patch, since there is no taxalevel 1 in taxonomy. Domain is 0, but it should be 1
+#			print "    $tid	$$tax{$tid}[3]	$$tax{$tid}[2]\n";
+#			if($$tax{$tid}[3] == 0 and $ranked_lin[0] eq '') # 0 is domain, no taxlevel index 1 in taxonomy.tsv
+															# Temporary fix, since all taxa above kingdom has 0 as a taxlevel
+#			{
+#				$ranked_lin[0] = $$tax{$tid}[2];
+#			}
+#			elsif($$tax{$tid}[3] >1)
+#			{
+				$ranked_lin[$$tax{$tid}[3] - 1] = $$tax{$tid}[2];
+#			}
 		}
 	}
 
+#	print "xxxxx @ranked_lin\n";
 	my $lower_taxa = $ranked_lin[7];
 	for(my $i = 6; $i > -1; --$i) # complete lineage if missing high level taxa
 	{
@@ -530,11 +542,11 @@ sub make_taxonomy_with_rank_levels
 	
 	my %tax_par; # $tax_par{taxid} = taxid parent
 	my %tax_rank; # $tax_rank{taxid} = rank
-	my %tax_ranked_lineage; # $ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+	my %tax_ranked_lineage; # $ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,domain)
 							# taxname is a scietific name of the taxid, there is allways one but only one scientific name for the taxon
 	my %merged; # $merged{taxid} = (list of old taxids)
 
-	# $tax_ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+	# $tax_ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,domain)
 	# taxname is a scietific name of the taxid, there is allways one but only one scientific name for the taxon
 	# $tax_ranked_lineage{taxid}[0] scientific name of the taxon
 	read_ncbitax_rankedlin($ncbi_tax_rankedlin, \%tax_ranked_lineage);
@@ -632,7 +644,7 @@ sub print_ltg_fasta_input
 	my ($ltg, $out, $seq) = @_;
 	
 	open(OUT, '>', $out) or die "Cannot open $out\n";
-	print OUT "seqid	pid	ltg_taxid	ltg_name	ltg_rank	superkingdom	kingdom	phylum	class	order	family	genus	species	sequence\n";
+	print OUT "seqid	pid	ltg_taxid	ltg_name	ltg_rank	ltg_rank_index	domain	kingdom	phylum	class	order	family	genus	species	sequence\n";
 	foreach my $id (sort keys %$seq)
 	{
 		unless(exists $$ltg{$id})
@@ -674,7 +686,7 @@ sub print_ltg_tsv_input
 		}
 	}
 	# complete the title line with ltg headings
-	splice(@title, $seq_i, 0, ('pid', 'ltg_taxid', 'ltg_name', 'ltg_rank', 'superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'));
+	splice(@title, $seq_i, 0, ('pid', 'ltg_taxid', 'ltg_name', 'ltg_rank', 'ltg_rank_index', 'domain', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'));
 	print OUT join("\t", @title), "\n";
 	
 	# read $in file
@@ -716,8 +728,8 @@ sub print_params_hash_to_log
 
 sub print_version
 {
-	print "####################\nmkLTG-0.1.2\n";
-	print "April 11, 2023\n####################\n";
+	print "####################\nmkLTG-0.2.0\n";
+	print "May 23, 2025\n####################\n";
 }
 
 ###############################################################
@@ -757,7 +769,7 @@ sub read_blast_results_to_hash
 sub read_ltg_params_to_hash
 {
 	my ($file, $ltg_params, $taxrank_ind) = @_;
-#	my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1);
+#	my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'domain',1);
 #	my %ltg_params; # $ltg_params{pid}{pcov/phit/taxn/seqn/refres/ltgres} = value
 
 # %hash{pcov/phit/taxn/seqn/refres/ltgres/blast_type} = column number
@@ -830,7 +842,7 @@ sub read_ltg_params_to_hash
 sub read_ncbitax_rankedlin
 {
 my ($file, $ranked_lin) = @_;
-# $ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,superkingdom)
+# $ranked_lin{taxid} =  (tax_name,species,genus,family,order,class,phylum,kingdom,domain)
 # taxname is a scietific name of the taxid, there is allways one but only one scientific name for the taxon
 
 	unless(open(IN, $file))

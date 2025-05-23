@@ -229,19 +229,27 @@ Adapt the **compare_params.R** script to your use
 
 ## Versions
 
-**mkLTG-0.1.0** 
+**mkLTG-0.1.0** (2023-02-24)
 
-2023-02-24
-
-**mkLTG-0.1.1**
-
-2023-03-29
+**mkLTG-0.1.1** (2023-03-29)
 
 Works with more sequences than the batch size
 
-**mkLTG-0.1.2**
-
-2023-04-11
+**mkLTG-0.1.2** (2023-04-11)
 
 Input sequences can be provided in fasta or TSV format
+
+**mkLTG-0.2.0** (2025-05-23)
+
+Adtapted to new tax ranks in NCBI taxonomy and can be used with COInr v-2025-05-12
+rank_index	Taxonomic rang
+0		root
+1		domain
+2		kingdom
+3		phylum
+4		class
+5		order
+6		family
+7		genus
+8		species
 

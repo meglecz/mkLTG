@@ -31,15 +31,15 @@ use mkLTG;
 #		pcov: minimum % of query coverage
 #		refres: minimun resolution of the reference sequence; 
 #			accepted resolutions in increasing order: 
-#			root, superkingdom, kingdom, phylum, class, order, family, genus, species
+#			root, domain, kingdom, phylum, class, order, family, genus, species
 
 # OUTPUT
 # if input was a fasta file => tsv with the following colums:
-# seqid	pid	ltg_taxid	ltg_name	ltg_rank	superkingdom	kingdom	phylum	class	order	family	genus	species	sequence
+# seqid	pid	ltg_taxid	ltg_name	ltg_rank	domain	kingdom	phylum	class	order	family	genus	species	sequence
 # sequences without ltg are kept in the file
 
 # if input was a tsv file => complete the tsv by adding the following columns before the sequence column:
-# pid	ltg_taxid	ltg_name	ltg_rank	superkingdom	kingdom	phylum	class	order	family	genus	species
+# pid	ltg_taxid	ltg_name	ltg_rank	domain	kingdom	phylum	class	order	family	genus	species
 # sequences without ltg are kept in the file
 
 
@@ -122,8 +122,8 @@ my $t = time;
 # read ltg params to hash
 print "Reading ltg parameters\n";
 ####
-my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'superkingdom',1);
-my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'superkingdom');
+my %taxrank_ind = ('species',8,'genus',7,'family',6,'order',5,'class',4,'phylum',3,'kingdom',2,'domain',1);
+my %ind_taxrank = (8, 'species',7,'genus',6,'family',5,'order',4,'class',3,'phylum',2,'kingdom',1,'domain');
 my %ltg_params; # $ltg_params{pid}{pcov/phit/taxn/seqn/refres/ltgres} = value
 # $perc_identity is the lowest value in the $ltg_params file
 my $perc_identity = read_ltg_params_to_hash($ltg_params, \%ltg_params, \%taxrank_ind);
@@ -201,7 +201,9 @@ foreach my $fas (@fastas)
 			if($ltg_taxid) # if taxid was deduced
 			{
 				my @ranked_lin = make_ranked_lineage($ltg_taxid, \%tax, \%ind_taxrank); # get ranked lineage
-				my @line = ($pid, $ltg_taxid, $tax{$ltg_taxid}[2], $tax{$ltg_taxid}[1]); # make a list with ltg info
+#				print "$qid $pid\n";
+#				print "@ranked_lin\n";
+				my @line = ($pid, $ltg_taxid, $tax{$ltg_taxid}[2], $tax{$ltg_taxid}[1], $tax{$ltg_taxid}[3]); # make a list with ltg info
 				splice(@line, scalar @line, 0, @ranked_lin); # add ranked lineage to list
 				$ltg{$qid} = join("\t", @line); # put list to the hash
 				last;
