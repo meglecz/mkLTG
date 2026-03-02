@@ -253,3 +253,6 @@ rank_index	Taxonomic rang
 7		genus
 8		species
 
+**mkLTG-0.2.1** (2026-03-020)
+
+The number of columns for unassigned sequences in the output tsv file is corrected.

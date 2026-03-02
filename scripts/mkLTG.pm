@@ -649,7 +649,7 @@ sub print_ltg_fasta_input
 	{
 		unless(exists $$ltg{$id})
 		{
-			$$ltg{$id} = "\t" x 11;
+			$$ltg{$id} = "\t" x 12;
 		}
 		print OUT $id, "\t", $$ltg{$id}, "\t$$seq{$id}\n";
 	}
@@ -697,7 +697,7 @@ sub print_ltg_tsv_input
 		my @line = split("\t", $line);
 		$line[$seq_i] = uc $line[$seq_i]; 
 		my $id = $seq_inv{$line[$seq_i]}; # get temporary sequence id used during blast
-		my $tmp = "\t" x 11; # make a string with taxonomic info
+		my $tmp = "\t" x 12; # make a string with taxonomic info
 		if(exists $$ltg{$id})
 		{
 			$tmp = $$ltg{$id};
@@ -728,8 +728,8 @@ sub print_params_hash_to_log
 
 sub print_version
 {
-	print "####################\nmkLTG-0.2.0\n";
-	print "May 23, 2025\n####################\n";
+	print "####################\nmkLTG-0.2.1\n";
+	print "Mars 02, 2026\n####################\n";
 }
 
 ###############################################################
